@@ -122,10 +122,7 @@ class LibnameConan(ConanFile):
 
         if tests_enabled:
             self.output.info("Running {} tests".format(self.name))
-            # cucumber-cpp does some prefixin internally, so adjust:
-            test_folder = os.path.join(self.build_subfolder, self.source_subfolder)
-            with tools.chdir(test_folder):
-                self.run(command='ctest')
+            self.run(command='ctest --build-config {}'.format(self.settings.build_type))
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self.source_subfolder)
