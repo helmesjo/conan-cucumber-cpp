@@ -101,7 +101,7 @@ class LibnameConan(ConanFile):
 
         cmake.definitions['CUKE_DISABLE_BOOST_TEST'] = not self.requires_boost_test
         cmake.definitions['CUKE_DISABLE_GTEST'] = not self.requires_gtest
-        cmake.definitions['CUKE_USE_STATIC_BOOST'] = not self.options['Boost'].shared
+        cmake.definitions['CUKE_USE_STATIC_BOOST'] = not self.options['boost'].shared
 
         # Boost
         cmake.definitions['BOOST_THREAD_USES_DATETIME'] = 1
