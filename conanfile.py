@@ -8,7 +8,7 @@ import os
 
 class LibnameConan(ConanFile):
     name = "cucumber-cpp"
-    version = "0.4"
+    version = "0.5"
     description =   "Cucumber-Cpp, formerly known \
                     as CukeBins, allows Cucumber to support \
                     step definitions written in C++."
@@ -55,12 +55,12 @@ class LibnameConan(ConanFile):
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
 
-    requires = ( "Boost/1.64.0@conan/stable" )
+    requires = ( "boost/1.66.0@conan/stable" )
 
     def requirements(self):
         if self.requires_gtest:
             self.requires.add("gtest/1.8.0@bincrafters/stable")
-
+    
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
