@@ -124,7 +124,7 @@ class LibnameConan(ConanFile):
 
         if tests_enabled:
             self.output.info("Running {} tests".format(self.name))
-            self.run(command='ctest --build-config {}'.format(self.settings.build_type))
+            cmake.test()
 
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self.source_subfolder)
