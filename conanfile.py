@@ -103,7 +103,7 @@ class LibnameConan(ConanFile):
 
         # Boost
         cmake.definitions['BOOST_THREAD_USES_DATETIME'] = 1
-        cmake.definitions['BOOST_ROOT'] = self.deps_cpp_info['Boost'].rootpath
+        cmake.definitions['BOOST_ROOT'] = self.deps_cpp_info['boost'].rootpath
 
         # GTest
         if self.requires_gtest:
