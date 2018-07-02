@@ -130,6 +130,9 @@ class LibnameConan(ConanFile):
     def package(self):
         self.copy(pattern="LICENSE", dst="licenses", src=self.source_subfolder)
 
+        generated_source = os.path.join(self.build_subfolder, "src")
+        self.copy(pattern="{}/*".format(self.name), dst="include", src=generated_source, keep_path=True)
+
         include_folder = os.path.join(self.source_subfolder, "include")
         self.copy(pattern="*", dst="include", src=include_folder)
         self.copy(pattern="*.dll", dst="bin", keep_path=False)
