@@ -60,6 +60,7 @@ class LibnameConan(ConanFile):
     def requirements(self):
         if self.requires_gtest:
             self.requires.add("gtest/1.8.0@bincrafters/stable")
+            self.options['gtest'].build_gmock = True
     
     def config_options(self):
         if self.settings.os == 'Windows':
