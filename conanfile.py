@@ -109,8 +109,9 @@ class LibnameConan(ConanFile):
         if self.requires_gtest:
             cmake.definitions['CUKE_USE_STATIC_GTEST'] = not self.options['gtest'].shared
             cmake.definitions['GTEST_ROOT'] = self.deps_cpp_info['gtest'].rootpath
+            cmake.definitions['GMOCK_ROOT'] = self.deps_cpp_info['gtest'].rootpath
 
-        cmake.configure(build_folder=self.build_subfolder)
+        cmake.configure(source_folder=self.source_subfolder, build_folder=self.build_subfolder)
         return cmake
 
     def build(self):
