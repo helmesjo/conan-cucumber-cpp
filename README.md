@@ -1,5 +1,5 @@
 [![Download](https://api.bintray.com/packages/helmesjo/public/cucumber-cpp%3Ahelmesjo/images/download.svg?version=0.5%3Atesting) ](https://bintray.com/helmesjo/public/cucumber-cpp%3Ahelmesjo/0.5%3Atesting/link)
-[![Build Status](https://travis-ci.org/bincrafters/conan-cucumber-cpp.svg?branch=stable%2F0.5)](https://travis-ci.org/bincrafters/conan-cucumber-cpp)
+[![Build Status](https://travis-ci.org/helmesjo/conan-cucumber-cpp.svg?branch=testing%2F0.5)](https://travis-ci.org/helmesjo/conan-cucumber-cpp)
 [![Build status](https://ci.appveyor.com/api/projects/status/1jeb8l204yi9ic8w?svg=true)](https://ci.appveyor.com/project/helmesjo/conan-cucumber-cpp)
 
 [Conan.io](https://conan.io) package recipe for [*cucumber-cpp*](https://github.com/cucumber/cucumber-cpp).
