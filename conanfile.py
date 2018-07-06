@@ -38,7 +38,6 @@ class LibnameConan(ConanFile):
         "valgrind_tests": [True, False],
     }
     default_options = (
-        "boost:fPIC=True",
         "shared=False", 
         "fPIC=True",
         "test_framework=gtest",
@@ -72,6 +71,9 @@ class LibnameConan(ConanFile):
             raise ConanException("Boost testing framework is currently not supported.")
         if not self.options.cuke_disable_qt:
             raise ConanException("Qt is currently not supported.")
+
+        if self.settings.compiler != 'Visual Studio':
+            self.options['boost'].add_option('fPIC', 'True')
 
         # Boost.Test fails to link. Skip for now.
         self.requires_boost_test = False # self.options.test_framework == "boost" or not self.options.cuke_disable_unit_tests
