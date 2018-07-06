@@ -38,6 +38,7 @@ class LibnameConan(ConanFile):
         "valgrind_tests": [True, False],
     }
     default_options = (
+        "boost:fPIC=True",
         "shared=False", 
         "fPIC=True",
         "test_framework=gtest",
