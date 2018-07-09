@@ -102,12 +102,12 @@ class LibnameConan(ConanFile):
             value = getattr(self.options, attr)
             add_cmake_option(attr, value)
 
+        cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
         cmake.definitions['CUKE_DISABLE_BOOST_TEST'] = not self.requires_boost_test
         cmake.definitions['CUKE_DISABLE_GTEST'] = not self.requires_gtest
         cmake.definitions['CUKE_USE_STATIC_BOOST'] = not self.options['boost'].shared
 
         # Boost
-        cmake.definitions['BOOST_THREAD_USES_DATETIME'] = 1
         cmake.definitions['BOOST_ROOT'] = self.deps_cpp_info['boost'].rootpath
 
         # GTest
