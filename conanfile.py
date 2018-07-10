@@ -4,7 +4,22 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanException
 import os
+import re
 
+def replace(file, pattern, subst):
+    # Read contents from file as a single string
+    file_handle = open(file, 'r')
+    file_string = file_handle.read()
+    file_handle.close()
+
+    # Use RE package to allow for replacement (also allowing for (multiline) REGEX)
+    file_string = (re.sub(pattern, "{} # <-- Line edited by conan package -->".format(subst), file_string))
+
+    # Write contents to file.
+    # Using mode 'w' truncates the file.
+    file_handle = open(file, 'w')
+    file_handle.write(file_string)
+    file_handle.close()
 
 class LibnameConan(ConanFile):
     name = "cucumber-cpp"
@@ -79,13 +94,20 @@ class LibnameConan(ConanFile):
         self.requires_boost_test = False # self.options.test_framework == "boost" or not self.options.cuke_disable_unit_tests
         self.requires_gtest = self.options.test_framework == "gtest" or not self.options.cuke_disable_unit_tests
 
+    def patch_cmake_file(self, root_cmakelists_file_path):
+        self.output.info("Patching CMakeLists.txt: {}".format(root_cmakelists_file_path))
+        replace(root_cmakelists_file_path, r"((?i)\bset\b\(*.Boost_USE_STATIC_LIBS .*\))", r"# \1")
+        replace(root_cmakelists_file_path, r"((?i)\bset\b\(*.Boost_USE_STATIC_RUNTIME .*\))", r"# \1")
+
     def source(self):
         source_url = "https://github.com/cucumber/cucumber-cpp"
         tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version))
         extracted_dir = self.name + "-" + self.version
 
-        #Rename to "source_subfolder" is a convention to simplify later steps
+        # Rename to "source_subfolder" is a convention to simplify later steps
         os.rename(extracted_dir, self.source_subfolder)
+        # Remove lines messing up "find_package(Boost ...)"
+        self.patch_cmake_file(os.path.join(self.source_subfolder ,"CMakeLists.txt"))
 
     def configure_cmake(self):
         cmake = CMake(self, set_cmake_flags=True)
