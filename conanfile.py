@@ -95,9 +95,13 @@ class LibnameConan(ConanFile):
         self.requires_gtest = self.options.test_framework == "gtest" or not self.options.cuke_disable_unit_tests
 
     def patch_cmake_file(self, root_cmakelists_file_path):
-        self.output.info("Patching CMakeLists.txt: {}".format(root_cmakelists_file_path))
+        self.output.info("Patching {}/CMakeLists.txt: {}".format(self.name, root_cmakelists_file_path))
+        # Remove hard-coded decision making of how to link boost.
         replace(root_cmakelists_file_path, r"((?i)\bset\b\(*.Boost_USE_STATIC_LIBS .*\))", r"# \1")
         replace(root_cmakelists_file_path, r"((?i)\bset\b\(*.Boost_USE_STATIC_RUNTIME .*\))", r"# \1")
+        # Forcefully insert 'add_definitions(-DBOOST_ALL_NO_LIB)' to disable boost auto-linking
+        # NOTE: Need this because it is defined as a cmake-variable implicitly from the boost requirement, but not as a preprocessor define...
+        replace(root_cmakelists_file_path, r"((?i)\bcmake_minimum_required\b\(*..*\))", r"\1\nadd_definitions(-DBOOST_ALL_NO_LIB)")
 
     def source(self):
         source_url = "https://github.com/cucumber/cucumber-cpp"
