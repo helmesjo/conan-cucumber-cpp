@@ -82,6 +82,9 @@ class LibnameConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler.runtime not in ["MD", "MDd"]:
+                raise ConanException("Currently only dynamic linking (MD) is supported on Windows.")
         if self.options.test_framework == "boost":
             raise ConanException("Boost testing framework is currently not supported.")
         if not self.options.cuke_disable_qt:
