@@ -82,9 +82,6 @@ class LibnameConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.compiler == "Visual Studio":
-            if self.settings.compiler.runtime not in ["MD", "MDd"]:
-                raise ConanException("Currently only dynamic linking (MD) is supported on Windows.")
         if self.options.test_framework == "boost":
             raise ConanException("Boost testing framework is currently not supported.")
         if not self.options.cuke_disable_qt:
@@ -102,9 +99,6 @@ class LibnameConan(ConanFile):
         # Remove hard-coded decision making of how to link boost.
         replace(root_cmakelists_file_path, r"((?i)\bset\b\(*.Boost_USE_STATIC_LIBS .*\))", r"# \1")
         replace(root_cmakelists_file_path, r"((?i)\bset\b\(*.Boost_USE_STATIC_RUNTIME .*\))", r"# \1")
-        # Forcefully insert 'add_definitions(-DBOOST_ALL_NO_LIB)' to disable boost auto-linking
-        # NOTE: Need this because it is defined as a cmake-variable implicitly from the boost requirement, but not as a preprocessor define...
-        replace(root_cmakelists_file_path, r"((?i)\bcmake_minimum_required\b\(*..*\))", r"\1\nadd_definitions(-DBOOST_ALL_NO_LIB)")
 
     def source(self):
         source_url = "https://github.com/cucumber/cucumber-cpp"
@@ -114,7 +108,8 @@ class LibnameConan(ConanFile):
         # Rename to "source_subfolder" is a convention to simplify later steps
         os.rename(extracted_dir, self.source_subfolder)
         # Remove lines messing up "find_package(Boost ...)"
-        self.patch_cmake_file(os.path.join(self.source_subfolder ,"CMakeLists.txt"))
+        cmake_file_path = os.path.join(self.source_subfolder ,"CMakeLists.txt")
+        self.patch_cmake_file(cmake_file_path)
 
     def configure_cmake(self):
         cmake = CMake(self, set_cmake_flags=True)
@@ -131,7 +126,6 @@ class LibnameConan(ConanFile):
             value = getattr(self.options, attr)
             add_cmake_option(attr, value)
 
-        cmake.definitions['BUILD_SHARED_LIBS'] = self.options.shared
         cmake.definitions['CUKE_DISABLE_BOOST_TEST'] = not self.requires_boost_test
         cmake.definitions['CUKE_DISABLE_GTEST'] = not self.requires_gtest
         cmake.definitions['CUKE_USE_STATIC_BOOST'] = not self.options['boost'].shared
@@ -145,7 +139,7 @@ class LibnameConan(ConanFile):
             cmake.definitions['GTEST_ROOT'] = self.deps_cpp_info['gtest'].rootpath
             cmake.definitions['GMOCK_ROOT'] = self.deps_cpp_info['gtest'].rootpath
 
-        cmake.configure(source_folder=self.source_subfolder, build_folder=self.build_subfolder)
+        cmake.configure(build_folder=self.build_subfolder)
         return cmake
 
     def build(self):
@@ -156,12 +150,15 @@ class LibnameConan(ConanFile):
 
         if tests_enabled:
             self.output.info("Running {} tests".format(self.name))
-            cmake.test()
+            source_path = os.path.join(self.build_subfolder, self.source_subfolder)
+            with tools.chdir(source_path):
+                self.run("ctest --build-config {}".format(self.settings.build_type))
 
-    def package(self):
+    def package(self):        
         self.copy(pattern="LICENSE", dst="licenses", src=self.source_subfolder)
 
-        generated_source = os.path.join(self.build_subfolder, "src")
+        source_path = os.path.join(self.build_subfolder, self.source_subfolder)
+        generated_source = os.path.join(source_path, "src")
         self.copy(pattern="{}/*".format(self.name), dst="include", src=generated_source, keep_path=True)
 
         include_folder = os.path.join(self.source_subfolder, "include")
