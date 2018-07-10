@@ -87,7 +87,7 @@ class LibnameConan(ConanFile):
         if not self.options.cuke_disable_qt:
             raise ConanException("Qt is currently not supported.")
 
-        if self.settings.compiler != 'Visual Studio':
+        if self.settings.compiler != 'Visual Studio' and self.options.shared:
             self.options['boost'].add_option('fPIC', 'True')
 
         # Boost.Test fails to link. Skip for now.
