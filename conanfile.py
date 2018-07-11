@@ -71,34 +71,44 @@ class LibnameConan(ConanFile):
     build_subfolder = "build_subfolder"
 
     requires = ( "boost/1.66.0@conan/stable" )
-
-    def requirements(self):
-        if self.requires_gtest:
-            self.requires.add("gtest/1.8.0@bincrafters/stable")
-            self.options['gtest'].build_gmock = True
     
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
     def configure(self):
-        if self.options.test_framework == "boost":
-            raise ConanException("Boost testing framework is currently not supported.")
         if not self.options.cuke_disable_qt:
             raise ConanException("Qt is currently not supported.")
 
         if self.settings.compiler != 'Visual Studio' and self.options.shared:
             self.options['boost'].add_option('fPIC', 'True')
 
-        # Boost.Test fails to link. Skip for now.
-        self.requires_boost_test = False # self.options.test_framework == "boost" or not self.options.cuke_disable_unit_tests
+        self.requires_boost_test = self.options.test_framework == "boost"
         self.requires_gtest = self.options.test_framework == "gtest" or not self.options.cuke_disable_unit_tests
 
-    def patch_cmake_file(self, root_cmakelists_file_path):
-        self.output.info("Patching {}/CMakeLists.txt: {}".format(self.name, root_cmakelists_file_path))
+        # Cucumber-cpp uses custom main entry-point with boost.test and requires dynamic linking
+        if self.requires_boost_test:
+            self.output.info("When using boost as test framework, boost must be linked dynamically. Forcing boost:shared=True.")
+            self.options['boost'].shared = True
+
+    def requirements(self):
+        if self.requires_gtest:
+            self.requires.add("gtest/1.8.0@bincrafters/stable")
+            self.options['gtest'].build_gmock = True
+
+    def patch_cmake_files(self):
+        root_cmakelists_file_path = os.path.join(self.source_subfolder ,"CMakeLists.txt")
+        src_cmakelists_file_path = os.path.join(self.source_subfolder ,"src/CMakeLists.txt")
+        self.output.info("Patching files: {}".format(", ".join( [root_cmakelists_file_path, src_cmakelists_file_path] )))
         # Remove hard-coded decision making of how to link boost.
-        replace(root_cmakelists_file_path, r"((?i)\bset\b\(*.Boost_USE_STATIC_LIBS .*\))", r"# \1")
-        replace(root_cmakelists_file_path, r"((?i)\bset\b\(*.Boost_USE_STATIC_RUNTIME .*\))", r"# \1")
+        replace(root_cmakelists_file_path, r"((?i)\bset\b\(.*Boost_USE_STATIC_LIBS .*\))", r"# \1")
+        replace(root_cmakelists_file_path, r"((?i)\bset\b\(.*Boost_USE_STATIC_RUNTIME .*\))", r"# \1")
+        replace(root_cmakelists_file_path, r"((?i)\bset\b\(.*DBOOST_ALL_DYN_LINK .*\))", r"# \1")
+        replace(root_cmakelists_file_path, r"((?i)\bset\b\(.*BOOST_TEST_DYN_LINK .*\))", r"# \1")
+        # Make sure boost::test & gtest is only linked if specifically required (not only if target exists or not)
+        replace(src_cmakelists_file_path, r"if\(.*(TARGET Boost::unit_test_framework).*\)", r"if(NOT CUKE_DISABLE_BOOST_TEST AND \1)")
+        replace(src_cmakelists_file_path, r"if\(.*(TARGET GTest::GTest).*\)", r"if(NOT CUKE_DISABLE_GTEST AND \1)")
+        replace(src_cmakelists_file_path, r"if\(.*(TARGET Qt5::Test).*\)", r"if(NOT CUKE_DISABLE_QT AND \1)")
 
     def source(self):
         source_url = "https://github.com/cucumber/cucumber-cpp"
@@ -107,9 +117,9 @@ class LibnameConan(ConanFile):
 
         # Rename to "source_subfolder" is a convention to simplify later steps
         os.rename(extracted_dir, self.source_subfolder)
-        # Remove lines messing up "find_package(Boost ...)"
-        cmake_file_path = os.path.join(self.source_subfolder ,"CMakeLists.txt")
-        self.patch_cmake_file(cmake_file_path)
+
+        # Remove lines that fail build
+        self.patch_cmake_files()
 
     def configure_cmake(self):
         cmake = CMake(self, set_cmake_flags=True)
@@ -125,14 +135,15 @@ class LibnameConan(ConanFile):
         for attr, _ in self.options.iteritems():
             value = getattr(self.options, attr)
             add_cmake_option(attr, value)
-
+        
         cmake.definitions['CUKE_DISABLE_BOOST_TEST'] = not self.requires_boost_test
         cmake.definitions['CUKE_DISABLE_GTEST'] = not self.requires_gtest
         cmake.definitions['CUKE_USE_STATIC_BOOST'] = not self.options['boost'].shared
 
         # Boost
         cmake.definitions['BOOST_ROOT'] = self.deps_cpp_info['boost'].rootpath
-
+        if self.requires_boost_test:
+            cmake.definitions['BOOST_TEST_DYN_LINK'] = "1"
         # GTest
         if self.requires_gtest:
             cmake.definitions['CUKE_USE_STATIC_GTEST'] = not self.options['gtest'].shared
@@ -172,3 +183,4 @@ class LibnameConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.libs.remove("cucumber-cpp-internal") # Only used internally by unit tests
+        
