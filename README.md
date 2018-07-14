@@ -1,25 +1,25 @@
-[![Download](https://api.bintray.com/packages/helmesjo/public/cucumber-cpp%3Ahelmesjo/images/download.svg?version=0.5%3Atesting) ](https://bintray.com/helmesjo/public/cucumber-cpp%3Ahelmesjo/0.5%3Atesting/link)
-[![Build Status](https://travis-ci.org/helmesjo/conan-cucumber-cpp.svg?branch=testing%2F0.5)](https://travis-ci.org/helmesjo/conan-cucumber-cpp)
-[![Build status](https://ci.appveyor.com/api/projects/status/1jeb8l204yi9ic8w?svg=true)](https://ci.appveyor.com/project/helmesjo/conan-cucumber-cpp)
+[![Download](https://api.bintray.com/packages/helmesjo/public-conan/cucumber-cpp%3Ahelmesjo/images/download.svg) ](https://bintray.com/helmesjo/public-conan/cucumber-cpp%3Ahelmesjo/_latestVersion)
+[![Build Status](https://travis-ci.org/helmesjo/conan-cucumber-cpp.svg?branch=stable%2F0.5)](https://travis-ci.org/helmesjo/conan-cucumber-cpp)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/helmesjo/conan-cucumber-cpp?branch=stable%2F0.5&svg=true)](https://ci.appveyor.com/project/helmesjo/conan-cucumber-cpp)
 
 [Conan.io](https://conan.io) package recipe for [*cucumber-cpp*](https://github.com/cucumber/cucumber-cpp).
 
 Cucumber-Cpp, formerly known                     as CukeBins, allows Cucumber to support                     step definitions written in C++.
 
-The packages generated with this **conanfile** can be found on [Bintray](https://bintray.com/bincrafters/public-conan/cucumber-cpp%3Abincrafters).
+The packages generated with this **conanfile** can be found on [Bintray](https://bintray.com/helmesjo/public-conan/cucumber-cpp%3Ahelmesjo).
 
 ## For Users: Use this package
 
 ### Basic setup
 
-    $ conan install cucumber-cpp/0.5@bincrafters/stable
+    $ conan install cucumber-cpp/0.5@helmesjo/stable
 
 ### Project setup
 
 If you handle multiple dependencies in your project is better to add a *conanfile.txt*
 
     [requires]
-    cucumber-cpp/0.5@bincrafters/stable
+    cucumber-cpp/0.5@helmesjo/stable
 
     [generators]
     cmake
@@ -32,13 +32,13 @@ Note: It is recommended that you run conan install from a build directory and no
 
 ## For Packagers: Publish this Package
 
-The example below shows the commands used to publish to bincrafters conan repository. To publish to your own conan respository (for example, after forking this git repository), you will need to change the commands below accordingly.
+The example below shows the commands used to publish to helmesjo conan repository. To publish to your own conan respository (for example, after forking this git repository), you will need to change the commands below accordingly.
 
 ## Build and package
 
 The following command both runs all the steps of the conan file, and publishes the package to the local system cache.  This includes downloading dependencies from "build_requires" and "requires" , and then running the build() method.
 
-    $ conan create bincrafters/stable
+    $ conan create helmesjo/stable
 
 
 ### Available Options
@@ -55,11 +55,11 @@ The following command both runs all the steps of the conan file, and publishes t
 
 ## Add Remote
 
-    $ conan remote add bincrafters "https://api.bintray.com/conan/bincrafters/public-conan"
+    $ conan remote add helmesjo "https://api.bintray.com/conan/helmesjo/public-conan"
 
 ## Upload
 
-    $ conan upload cucumber-cpp/0.5@bincrafters/stable --all -r bincrafters
+    $ conan upload cucumber-cpp/0.5@helmesjo/stable --all -r helmesjo
 
 
 ## Conan Recipe License
