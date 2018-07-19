@@ -166,7 +166,7 @@ class LibnameConan(ConanFile):
                 self.run("ctest --build-config {}".format(self.settings.build_type))
 
     def package(self):        
-        self.copy(pattern="LICENSE", dst="licenses", src=self.source_subfolder)
+        self.copy(pattern="LICENSE*", dst="licenses", src=self.source_subfolder)
 
         source_path = os.path.join(self.build_subfolder, self.source_subfolder)
         generated_source = os.path.join(source_path, "src")
