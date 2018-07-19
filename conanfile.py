@@ -30,43 +30,35 @@ class LibnameConan(ConanFile):
     url = "https://github.com/helmesjo/conan-cucumber-cpp"
     homepage = "https://github.com/cucumber/cucumber-cpp"
     author = "helmesjo <helmesjo@gmail.com>"
-    # Indicates License type of the packaged library
     license = "MIT"
-
-    # Packages the license for the conanfile.py
     exports = ["LICENSE.md"]
 
-    # Remove following lines if the target lib does not use cmake.
     exports_sources = ["CMakeLists.txt"]
     generators = "cmake"
 
-    # Options may need to change depending on the packaged library.
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False], 
         "fPIC": [True, False],
         "test_framework": ["boost", "gtest"],
-        "cuke_disable_e2e_tests": [True, False],
-        "cuke_disable_qt": [True, False],
-        "cuke_disable_unit_tests": [True, False],
-        "cuke_enable_examples": [True, False],
-        "valgrind_tests": [True, False],
+        "build_e2e_tests": [True, False],
+        "build_unit_tests": [True, False],
+        "build_valgrind_tests": [True, False],
+        "build_examples": [True, False],
     }
     default_options = (
         "shared=False", 
         "fPIC=True",
         "test_framework=gtest",
-        "cuke_disable_e2e_tests=True",
-        "cuke_disable_qt=True",
-        "cuke_disable_unit_tests=True",
-        "cuke_enable_examples=False",
-        "valgrind_tests=False",
+        "build_e2e_tests=False",
+        "build_unit_tests=False",
+        "build_valgrind_tests=False",
+        "build_examples=False",
     )
 
     requires_boost_test = False
     requires_gtest = False
 
-    # Custom attributes for Bincrafters recipe conventions
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
 
@@ -77,14 +69,14 @@ class LibnameConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if not self.options.cuke_disable_qt:
-            raise ConanException("Qt is currently not supported.")
-
+        if self.options.build_valgrind_tests:
+            raise ConanException("Building valgrind tests is currently not supported (no valgrind conan package available).")
+        
         if self.settings.compiler != 'Visual Studio' and self.options.shared:
             self.options['boost'].add_option('fPIC', 'True')
 
         self.requires_boost_test = self.options.test_framework == "boost"
-        self.requires_gtest = self.options.test_framework == "gtest" or not self.options.cuke_disable_unit_tests
+        self.requires_gtest = self.options.test_framework == "gtest" or not self.options.build_unit_tests
 
         # Cucumber-cpp uses custom main entry-point with boost.test and requires dynamic linking
         if self.requires_boost_test:
@@ -126,16 +118,12 @@ class LibnameConan(ConanFile):
         if self.settings.os != 'Windows':
             cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
 
-        def add_cmake_option(option, value):
-            var_name = "{}".format(option).upper()
-            value_str = "{}".format(value)
-            var_value = "ON" if value_str == 'True' else "OFF" if value_str == 'False' else value_str 
-            cmake.definitions[var_name] = var_value
+        cmake.definitions['CUKE_DISABLE_QT'] = True
+        cmake.definitions['CUKE_DISABLE_E2E_TESTS'] = not self.options.build_e2e_tests
+        cmake.definitions['CUKE_DISABLE_UNIT_TESTS'] = not self.options.build_unit_tests
+        cmake.definitions['CUKE_ENABLE_EXAMPLES'] = self.options.build_examples
+        cmake.definitions['VALGRIND_TESTS'] = self.options.build_valgrind_tests
 
-        for attr, _ in self.options.iteritems():
-            value = getattr(self.options, attr)
-            add_cmake_option(attr, value)
-        
         cmake.definitions['CUKE_DISABLE_BOOST_TEST'] = not self.requires_boost_test
         cmake.definitions['CUKE_DISABLE_GTEST'] = not self.requires_gtest
         cmake.definitions['CUKE_USE_STATIC_BOOST'] = not self.options['boost'].shared
@@ -157,8 +145,7 @@ class LibnameConan(ConanFile):
         cmake = self.configure_cmake()
         cmake.build()
 
-        tests_enabled = not self.options.cuke_disable_unit_tests or not self.options.cuke_disable_e2e_tests
-
+        tests_enabled = self.options.build_unit_tests or self.options.build_e2e_tests
         if tests_enabled:
             self.output.info("Running {} tests".format(self.name))
             source_path = os.path.join(self.build_subfolder, self.source_subfolder)
