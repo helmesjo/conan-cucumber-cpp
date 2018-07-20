@@ -44,14 +44,13 @@ The following command both runs all the steps of the conan file, and publishes t
 ### Available Options
 | Option        | Default | Possible Values  |
 | ------------- |:----------------- |:------------:|
-| test_framework      | gtest |  ['boost', 'gtest'] |
-| cuke_disable_qt      | True |  [True, False] |
-| cuke_disable_e2e_tests      | True |  [True, False] |
-| valgrind_tests      | False |  [True, False] |
-| cuke_enable_examples      | False |  [True, False] |
 | shared      | False |  [True, False] |
 | fPIC      | True |  [True, False] |
-| cuke_disable_unit_tests      | True |  [True, False] |
+| test_framework      | gtest |  ['boost', 'gtest'] |
+| build_e2e_tests      | False |  [True, False] |
+| build_unit_tests      | False |  [True, False] |
+| build_valgrind_tests      | False |  [True, False] |
+| build_examples      | False |  [True, False] |
 
 ## Add Remote
 
@@ -67,4 +66,4 @@ The following command both runs all the steps of the conan file, and publishes t
 NOTE: The conan recipe license applies only to the files of this recipe, which can be used to build and package cucumber-cpp.
 It does *not* in any way apply or is related to the actual software being packaged.
 
-[MIT](https://github.com/helmesjo/conan-cucumber-cpp.git/blob/testing/0.5/LICENSE)
+[MIT](https://github.com/helmesjo/conan-cucumber-cpp/blob/stable/0.5/LICENSE.md)
