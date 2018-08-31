@@ -171,3 +171,6 @@ class LibnameConan(ConanFile):
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.libs.remove("cucumber-cpp-internal") # Only used internally by unit tests
         
+        # If MinGW
+        if self.settings.compiler == "gcc" and self.settings.os == "Windows":
+            self.cpp_info.exelinkflags.append("ws2_32")
