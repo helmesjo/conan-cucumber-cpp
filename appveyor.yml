@@ -13,7 +13,8 @@ environment:
     CONAN_UPLOAD_ONLY_WHEN_STABLE: 0
 
     matrix:
-        #- MINGW_CONFIGURATIONS: '4.9@x86_64@seh@posix, 4.9@x86_64@sjlj@posix, 4.9@x86@sjlj@posix, 4.9@x86@dwarf2@posix, 6@x86_64@seh@posix, 7@x86_64@seh@posix'
+        - MINGW_CONFIGURATIONS: "7@x86_64@seh@posix"
+          CONAN_BASH_PATH: "c:\\msys64\\usr\\bin\\bash"
         - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
           CONAN_VISUAL_VERSIONS: 12
           CONAN_BUILD_TYPES: Release
