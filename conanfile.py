@@ -62,7 +62,7 @@ class LibnameConan(ConanFile):
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
 
-    requires = ( "boost/1.66.0@conan/stable" )
+    requires = ( "boost/1.67.0@conan/stable" )
     
     def config_options(self):
         if self.settings.os == 'Windows':
